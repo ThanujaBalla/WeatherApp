@@ -23,6 +23,10 @@ final class LocationListViewModel: ObservableObject {
                        .localizedCaseInsensitiveContains(searchText)
                }
            }
+        for loc in cachedLocations {
+            print("📍", loc.name ?? "", "icon:", loc.weatherIcon ?? "nil")
+        }
+
        }
 
     func temperatureFor(

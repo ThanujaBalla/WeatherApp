@@ -4,67 +4,91 @@
 //
 //  Created by rentamac on 1/22/26.
 //
-
 import SwiftUI
+
 struct LocationDetailView: View {
-    let location : WeatherLocation
-    @StateObject private var viewModel = WeatherViewModel(weatherService: WeatherService(networkService: HttpNetworking()))
-    
-    
-    private func Infocard(title: String, value:String )-> some View{
-        VStack(spacing: 6){
-            Text(title).font(.caption).foregroundColor(.white.opacity(0.6))
-            Text(value).font(.headline).foregroundColor(.white)
-        }.frame(maxWidth: .infinity).padding().background(RoundedRectangle(cornerRadius: 12).fill(Color.white.opacity(0.08)))
+
+    @ObservedObject var location: WeatherLocation
+    @StateObject private var viewModel =
+        WeatherViewModel(
+            weatherService: WeatherService(
+                networkService: HttpNetworking()
+            )
+        )
+
+    private func InfoCard(title: String, value: String) -> some View {
+        VStack(spacing: 6) {
+            Text(title)
+                .font(.caption)
+                .foregroundColor(.white.opacity(0.6))
+            Text(value)
+                .font(.headline)
+                .foregroundColor(.white)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color.white.opacity(0.08))
+        )
     }
-    
+
     var body: some View {
         ZStack {
-                    Color("Color")
-                        .ignoresSafeArea()
+            Color("Color").ignoresSafeArea()
 
-                    VStack(spacing: 24) {
-                        Text(location.name ?? "")
-                            .font(.largeTitle)
-                            .foregroundColor(.white)
+            VStack(spacing: 24) {
 
-                        Image(systemName: location.weatherIcon ?? "questionmark")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 250, height: 250)
-                            .foregroundColor(.yellow)
-                        if let temperature = viewModel.temperature {
-                            Text("\(temperature, specifier: "%.1f") °C").font(Font.largeTitle.bold()).foregroundColor(Color.white)
-                        }else if viewModel.isLoading {
-                            Text("Loading...")
-                                .foregroundColor(.white.opacity(0.7))
-                        }else if let error = viewModel.errorMessage {
-                            Text(error)
-                                .foregroundColor(Color.red)
-                        }
+                Text(location.name ?? "")
+                    .font(.largeTitle)
+                    .foregroundColor(.white)
 
-                        VStack(spacing: 12){
-                            HStack(spacing: 12){
-                                Infocard(title: "Humidity", value: "\(viewModel.relativeHumidity ?? 32) %")
-                                Infocard(title: "Wind Speed", value:"\(viewModel.windSpeed ?? 34.2) km/h")
-                            }
-                            HStack(spacing: 12){
-                                Infocard(title: "Showers", value: "\(viewModel.showers ?? 32.1)")
-                                Infocard(title: "Visibility", value: "\(viewModel.visibility ?? 34.1) km")
-                            }
-                        }.padding(.horizontal,16)
+                Image(systemName: viewModel.weatherIcon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 220, height: 220)
+                    .foregroundColor(.yellow)
 
-                        Spacer()
+                if let temp = viewModel.temperature {
+                    Text("\(temp, specifier: "%.1f") °C")
+                        .font(.largeTitle.bold())
+                        .foregroundColor(.white)
+                } else if viewModel.isLoading {
+                    Text("Loading…")
+                        .foregroundColor(.white.opacity(0.7))
+                }
+
+                VStack(spacing: 12) {
+                    HStack(spacing: 12) {
+                        InfoCard(
+                            title: "Humidity",
+                            value: "\(viewModel.relativeHumidity ?? 0)%"
+                        )
+                        InfoCard(
+                            title: "Wind",
+                            value: "\(viewModel.windSpeed ?? 0) km/h"
+                        )
                     }
-                    .padding(.top, 20)
-        }.task{
-            let cityName = location.name ?? ""
-            viewModel.loadCachedWeather(
-                    name: cityName,
-                    latitude: location.latitude,
-                    longitude: location.longitude
-                )
-            await viewModel.fetchWeather(name: cityName,latitude: location.latitude, longitude: location.longitude)
+                    HStack(spacing: 12) {
+                        InfoCard(
+                            title: "Showers",
+                            value: "\(viewModel.showers ?? 0)"
+                        )
+                        InfoCard(
+                            title: "Visibility",
+                            value: "\(viewModel.visibility ?? 0) km"
+                        )
+                    }
+                }
+                .padding(.horizontal)
+
+                Spacer()
+            }
+            .padding(.top, 20)
+        }
+        .task {
+            viewModel.loadCachedWeather(from: location)
+            await viewModel.fetchWeather(for: location)
         }
     }
 }

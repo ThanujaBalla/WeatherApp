@@ -17,9 +17,9 @@ struct LocationListView: View {
         
         List {
             ForEach(viewModel.cachedLocations) { location in
-                NavigationLink {
-                    LocationDetailView(location: location)
+                NavigationLink {                    LocationDetailView(location: location)
                         .onDisappear{
+
                             refreshID = UUID()
                         }
                 } label: {
@@ -31,7 +31,7 @@ struct LocationListView: View {
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
                 .listRowInsets(EdgeInsets())
-                .buttonStyle(.plain)
+                
                 .padding(.vertical, 3)
             }
         }
@@ -41,10 +41,19 @@ struct LocationListView: View {
             .scrollContentBackground(.hidden)
             .scrollIndicators(.visible)
             .background(Color("Color"))
-                .searchable(text: $searchText,placement: .navigationBarDrawer(displayMode: .always), prompt: "Search location")
+            .searchable(text: $searchText,placement: .navigationBarDrawer(displayMode: .always), prompt: "Search location")
                 .navigationTitle(Text("Locations"))
                 .onChange(of: searchText) { newValue in
                     viewModel.loadCachedLocations(searchText: newValue)
+                }
+                .toolbar{
+                    ToolbarItem(placement: .navigationBarTrailing){
+                        NavigationLink{
+                            SearchLocationView()
+                        }label:{
+                            Image(systemName: "plus")
+                        }
+                    }
                 }
             
             
