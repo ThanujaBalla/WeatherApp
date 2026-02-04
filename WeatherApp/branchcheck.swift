@@ -7,5 +7,8 @@
 
 import Foundation
 import SwiftUI
+<<<<<<< HEAD
 
 //hi thereeeeee....second request
+=======
+>>>>>>> main
